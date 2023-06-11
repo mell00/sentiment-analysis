@@ -11,7 +11,6 @@ afinn_scores = load_afinn_scores()
 vader_scores = load_vader_scores()
 sentiwordnet_scores = load_sentiwordnet_scores()
 textblob_scores = load_textblob_scores()
-nrclex_scores = load_nrclex_scores()
 pattern_scores = load_pattern_scores()
 
 # Perform Z-score normalization on the sentiment scores
@@ -20,12 +19,11 @@ afinn_scores_normalized = scaler.fit_transform(afinn_scores.reshape(-1, 1))
 vader_scores_normalized = scaler.fit_transform(vader_scores.reshape(-1, 1))
 sentiwordnet_scores_normalized = scaler.fit_transform(sentiwordnet_scores.reshape(-1, 1))
 textblob_scores_normalized = scaler.fit_transform(textblob_scores.reshape(-1, 1))
-nrclex_scores_normalized = scaler.fit_transform(nrclex_scores.reshape(-1, 1))
 pattern_scores_normalized = scaler.fit_transform(pattern_scores.reshape(-1, 1))
 
 # Reshape the normalized sentiment scores into a feature matrix for the fusion model
 X = np.concatenate((afinn_scores_normalized, vader_scores_normalized, sentiwordnet_scores_normalized,
-                    textblob_scores_normalized, nrclex_scores_normalized, pattern_scores_normalized), axis=1)
+                    textblob_scores_normalized, pattern_scores_normalized), axis=1)
 
 # Load the trained fusion model (Linear Regression model in this example)
 model = LinearRegression()
