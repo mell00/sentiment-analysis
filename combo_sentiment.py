@@ -45,6 +45,10 @@ def analyze_sentiment(text):
 text = "I'm not happy with the product."
 afinn_score, sentiment_scores, sentiwordnet_score, textblob_polarity, emotion_scores, pattern_score = analyze_sentiment(text)
 
+# Aggregate the scores or perform comparisons as desired
+aggregate_score = (afinn_score + sentiment_scores['compound'] + sentiwordnet_score + textblob_polarity + sum(emotion_scores.values()) + pattern_score) / 6
+print("Aggregate Score:", aggregate_score)
+
 print("AFINN Score:", afinn_score)
 print("Sentiment Scores (VADER):", sentiment_scores)
 print("SentiWordNet Score:", sentiwordnet_score)
