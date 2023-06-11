@@ -34,10 +34,3 @@ def analyze_sentiment(text):
         sentiment_label = "Neutral"
 
     return sentiment_scores, sentiment_label
-
-# Example usage
-text = "I'm not happy with the product."
-scores, label = analyze_sentiment(text)
-
-print("Sentiment Scores:", scores)
-print("Sentiment Label:", label)
