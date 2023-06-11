@@ -3,39 +3,35 @@
 #sentiment score using the feature matrix.
 
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
 
-# Prepare the dataset
-# Assuming you have a dataset with individual lexicon scores and sentiment labels
-# X represents the feature matrix (lexicon scores), y represents the target variable (sentiment labels)
+# Load the sentiment scores from the generated dataset
+afinn_scores = load_afinn_scores()
+vader_scores = load_vader_scores()
+sentiwordnet_scores = load_sentiwordnet_scores()
+textblob_scores = load_textblob_scores()
+nrclex_scores = load_nrclex_scores()
+pattern_scores = load_pattern_scores()
 
-# Split the dataset into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Perform Z-score normalization on the sentiment scores
+scaler = StandardScaler()
+afinn_scores_normalized = scaler.fit_transform(afinn_scores.reshape(-1, 1))
+vader_scores_normalized = scaler.fit_transform(vader_scores.reshape(-1, 1))
+sentiwordnet_scores_normalized = scaler.fit_transform(sentiwordnet_scores.reshape(-1, 1))
+textblob_scores_normalized = scaler.fit_transform(textblob_scores.reshape(-1, 1))
+nrclex_scores_normalized = scaler.fit_transform(nrclex_scores.reshape(-1, 1))
+pattern_scores_normalized = scaler.fit_transform(pattern_scores.reshape(-1, 1))
 
-# Train the model
+# Reshape the normalized sentiment scores into a feature matrix for the fusion model
+X = np.concatenate((afinn_scores_normalized, vader_scores_normalized, sentiwordnet_scores_normalized,
+                    textblob_scores_normalized, nrclex_scores_normalized, pattern_scores_normalized), axis=1)
+
+# Load the trained fusion model (Linear Regression model in this example)
 model = LinearRegression()
-model.fit(X_train, y_train)
+model.load_model("fusion_model.pkl")  # Load the trained model from a saved file
 
-# Make predictions on the testing set
-y_pred = model.predict(X_test)
+# Predict the aggregated sentiment score using the fusion model
+aggregated_score = model.predict(X)
 
-# Model evaluation
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-print("Mean Squared Error:", mse)
-print("R2 Score:", r2)
-
-# Aggregated score calculation for a new text input
-# Assuming you have the lexicon scores for the new text stored in a variable called 'new_lexicon_scores'
-new_lexicon_scores = [0.2, 0.4, -0.1, 0.5]  # Example scores, replace with actual lexicon scores
-
-# Reshape the lexicon scores to match the shape expected by the model
-new_lexicon_scores = np.array(new_lexicon_scores).reshape(1, -1)
-
-# Predict the sentiment label or score for the new text
-aggregated_score = model.predict(new_lexicon_scores)
-
-# Use the aggregated_score for further analysis or decision-making
 print("Aggregated Score:", aggregated_score)
