@@ -1,19 +1,18 @@
-# updated version of the sentiment analysis script that trains using the AFINN, VADER, SentiWordNet, TextBlob, EmoLex, and MPQA Subjectivity lexicons
+# updated version of the sentiment analysis script that trains using the AFINN, VADER, SentiWordNet, TextBlob, NRCLex, and Pattern lexicons
+# and produces an aggregated score to be used in further analyses
 
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.corpus import sentiwordnet as swn
 from afinn import Afinn
 from textblob import TextBlob
-from emotion.EmoLex import EmoLex
-from mpqa.MpqaSubjectivityLexicon import MpqaSubjectivityLexicon
+from nrclex import NRCLex
+from pattern.en import sentiment as pattern_sentiment
 
 def analyze_sentiment(text):
     # Initialize the sentiment analyzers
     sia = SentimentIntensityAnalyzer()
     afinn = Afinn()
-    emo_lex = EmoLex()
-    mpqa_lex = MpqaSubjectivityLexicon()
 
     # Perform sentiment analysis using AFINN lexicon
     afinn_score = afinn.score(text)
@@ -33,21 +32,22 @@ def analyze_sentiment(text):
     blob = TextBlob(text)
     textblob_polarity = blob.sentiment.polarity
 
-    # Perform sentiment analysis using EmoLex
-    emolex_scores = emo_lex.compute_emotion_scores(text)
+    # Perform sentiment analysis using NRCLex
+    nrc = NRCLex(text)
+    emotion_scores = nrc.affect_frequencies
 
-    # Perform sentiment analysis using MPQA Subjectivity Lexicon
-    mpqa_scores = mpqa_lex.get_scores(text)
+    # Perform sentiment analysis using Pattern
+    pattern_score = pattern_sentiment(text)[0]
 
-    return afinn_score, sentiment_scores, sentiwordnet_scores, textblob_polarity, emolex_scores, mpqa_scores
+    return afinn_score, sentiment_scores, sentiwordnet_scores, textblob_polarity, emotion_scores, pattern_score
 
 # Example usage
 text = "I'm not happy with the product."
-afinn_score, sentiment_scores, sentiwordnet_score, textblob_polarity, emolex_scores, mpqa_scores = analyze_sentiment(text)
+afinn_score, sentiment_scores, sentiwordnet_score, textblob_polarity, emotion_scores, pattern_score = analyze_sentiment(text)
 
 print("AFINN Score:", afinn_score)
 print("Sentiment Scores (VADER):", sentiment_scores)
 print("SentiWordNet Score:", sentiwordnet_score)
 print("TextBlob Polarity:", textblob_polarity)
-print("EmoLex Scores:", emolex_scores)
-print("MPQA Scores:", mpqa_scores)
+print("Emotion Scores (NRCLex):", emotion_scores)
+print("Pattern Score:", pattern_score)
