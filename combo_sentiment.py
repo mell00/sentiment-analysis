@@ -1,4 +1,4 @@
-# updated version of the sentiment analysis script that trains using the AFINN, VADER, SentiWordNet, TextBlob, NRCLex, and Pattern lexicons
+# updated version of the sentiment analysis script that trains using the AFINN, VADER, SentiWordNet, TextBlob, and Pattern lexicons
 # and produces an aggregated score to be used in further analyses
 
 import nltk
@@ -6,7 +6,6 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.corpus import sentiwordnet as swn
 from afinn import Afinn
 from textblob import TextBlob
-from nrclex import NRCLex
 from pattern.en import sentiment as pattern_sentiment
 
 def analyze_sentiment(text):
@@ -32,26 +31,28 @@ def analyze_sentiment(text):
     blob = TextBlob(text)
     textblob_polarity = blob.sentiment.polarity
 
-    # Perform sentiment analysis using NRCLex
-    nrc = NRCLex(text)
-    emotion_scores = nrc.affect_frequencies
-
     # Perform sentiment analysis using Pattern
     pattern_score = pattern_sentiment(text)[0]
 
-    return afinn_score, sentiment_scores, sentiwordnet_scores, textblob_polarity, emotion_scores, pattern_score
+    return afinn_score, sentiment_scores, sentiwordnet_scores, textblob_polarity, pattern_score
+    #return {
+       # "AFINN": afinn_score,
+        #"VADER": sentiment_scores["compound"],
+        #"SentiWordNet": sentiwordnet_scores,
+        #"TextBlob": textblob_polarity,
+        #"Pattern": pattern_score
+    #}
 
 # Example usage
 text = "I'm not happy with the product."
-afinn_score, sentiment_scores, sentiwordnet_score, textblob_polarity, emotion_scores, pattern_score = analyze_sentiment(text)
+afinn_score, sentiment_scores, sentiwordnet_score, textblob_polarity, pattern_score = analyze_sentiment(text)
 
 # Aggregate the scores or perform comparisons as desired
-aggregate_score = (afinn_score + sentiment_scores['compound'] + sentiwordnet_score + textblob_polarity + sum(emotion_scores.values()) + pattern_score) / 6
+aggregate_score = (afinn_score + sentiment_scores['compound'] + sentiwordnet_score + textblob_polarity + pattern_score) / 5
 print("Aggregate Score:", aggregate_score)
 
 print("AFINN Score:", afinn_score)
 print("Sentiment Scores (VADER):", sentiment_scores)
 print("SentiWordNet Score:", sentiwordnet_score)
 print("TextBlob Polarity:", textblob_polarity)
-print("Emotion Scores (NRCLex):", emotion_scores)
 print("Pattern Score:", pattern_score)
