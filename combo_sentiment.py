@@ -1,5 +1,5 @@
 # updated version of the sentiment analysis script that trains using the AFINN, VADER, SentiWordNet, TextBlob, and Pattern lexicons
-# and produces an aggregated score to be used in further analyses
+# (does not produce an aggregated score anymore; see compute_aggregated_score.py)
 
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
@@ -34,11 +34,17 @@ def analyze_sentiment(text):
     # Perform sentiment analysis using Pattern
     pattern_score = pattern_sentiment(text)[0]
 
-    return afinn_score, sentiment_scores, sentiwordnet_scores, textblob_polarity, pattern_score
-    #return {
-       # "AFINN": afinn_score,
-        #"VADER": sentiment_scores["compound"],
-        #"SentiWordNet": sentiwordnet_scores,
-        #"TextBlob": textblob_polarity,
-        #"Pattern": pattern_score
-    #}
+    return create_dictionary(afinn_score,sentiment_scores["compound"],sentiwordnet_scores,textblob_polarity,pattern_score)
+
+def create_dictionary(a,b,c,d,e):
+   lexicon_scores = dict();
+   lexicon_scores['AFINN'] = a
+   lexicon_scores['VADER'] = b
+   lexicon_scores['SentiWordNet'] = c
+   lexicon_scores['TextBlob'] = d
+   lexicon_scores['Pattern'] = e
+   return lexicon_scores
+
+#Test run
+lexicon_scores = analyze_sentiment("I hate this product.")
+print('The returned dictionary is:', lexicon_scores)
