@@ -1,35 +1,39 @@
-# Machine learning script that loads the sentiment scores from the generated dataset and reshapes them into a 
-#feature matrix. The loaded fusion model (trained and saved separately) predicts the aggregated 
-#sentiment score using the feature matrix.
+# Script that loads the sentiment scores from the lexicons and predicts the aggregated 
+# sentiment score using min-max normalization
 
+from combo_sentiment import *
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import MinMaxScaler
 
-# Load the sentiment scores from the generated dataset
-afinn_scores = load_afinn_scores()
-vader_scores = load_vader_scores()
-sentiwordnet_scores = load_sentiwordnet_scores()
-textblob_scores = load_textblob_scores()
-pattern_scores = load_pattern_scores()
+# Extract scores from the lexicon_scores dictionary
+afinn_scores = np.asarray(lexicon_scores['AFINN'])
+vader_scores = np.asarray(lexicon_scores['VADER'])
+sentiwordnet_scores = np.asarray(lexicon_scores['SentiWordNet'])
+textblob_scores = np.asarray(lexicon_scores['TextBlob'])
+pattern_scores = np.asarray(lexicon_scores['Pattern'])
 
-# Perform Z-score normalization on the sentiment scores
-scaler = StandardScaler()
-afinn_scores_normalized = scaler.fit_transform(afinn_scores.reshape(-1, 1))
-vader_scores_normalized = scaler.fit_transform(vader_scores.reshape(-1, 1))
-sentiwordnet_scores_normalized = scaler.fit_transform(sentiwordnet_scores.reshape(-1, 1))
-textblob_scores_normalized = scaler.fit_transform(textblob_scores.reshape(-1, 1))
-pattern_scores_normalized = scaler.fit_transform(pattern_scores.reshape(-1, 1))
+# Define the minimum and maximum possible scores for each lexicon
+afinn_min, afinn_max = -5, 5
+vader_min, vader_max = -1, 1
+sentiwordnet_min, sentiwordnet_max = -1, 1
+textblob_min, textblob_max = -1, 1
+pattern_min, pattern_max = -1, 1
 
-# Reshape the normalized sentiment scores into a feature matrix for the fusion model
-X = np.concatenate((afinn_scores_normalized, vader_scores_normalized, sentiwordnet_scores_normalized,
-                    textblob_scores_normalized, pattern_scores_normalized), axis=1)
+# Normalize the scores based on the range of each lexicon
+afinn_normalized = (afinn_scores - afinn_min) / (afinn_max - afinn_min)
+vader_normalized = (vader_scores - vader_min) / (vader_max - vader_min)
+sentiwordnet_normalized = (sentiwordnet_scores - sentiwordnet_min) / (sentiwordnet_max - sentiwordnet_min)
+textblob_normalized = (textblob_scores - textblob_min) / (textblob_max - textblob_min)
+pattern_normalized = (pattern_scores - pattern_min) / (pattern_max - pattern_min)
 
-# Load the trained fusion model (Linear Regression model in this example)
-model = LinearRegression()
-model.load_model("fusion_model.pkl")  # Load the trained model from a saved file
+# Combine the normalized scores into a single numpy array
+normalized_all_scores = np.vstack((afinn_normalized, vader_normalized,
+                                   sentiwordnet_normalized, textblob_normalized,
+                                   pattern_normalized)).T
 
-# Predict the aggregated sentiment score using the fusion model
-aggregated_score = model.predict(X)
+# Calculate the aggregated score by taking the average of the normalized scores
+aggregated_score = np.mean(normalized_all_scores, axis=1)
 
 print("Aggregated Score:", aggregated_score)
